@@ -1,0 +1,300 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MEMBER
+  VIEWER
+}
+
+enum DataSourceType {
+  CSV
+  JSON
+  API
+}
+
+enum DataSourceStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum RecordStatus {
+  VALID
+  INVALID
+  DUPLICATE
+}
+
+enum ResultType {
+  MATCHED
+  MISMATCH
+  MISSING_FROM_A
+  MISSING_FROM_B
+}
+
+enum ExceptionStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  IGNORED
+}
+
+enum ExceptionSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Organization {
+  id              String           @id @default(uuid())
+  name            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  users           User[]
+  dataSources     DataSource[]
+  imports         Import[]
+  sourceRecords   SourceRecord[]
+  matchingRules   MatchingRule[]
+  reconciliations Reconciliation[]
+  exceptions      Exception[]
+  auditLogs       AuditLog[]
+
+  @@map("organizations")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  passwordHash    String
+  name            String
+  role            Role              @default(MEMBER)
+  organizationId  String
+  organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  reconciliations Reconciliation[]  @relation("CreatedReconciliations")
+  assignedExceptions Exception[]    @relation("AssignedExceptions")
+  createdExceptions  Exception[]    @relation("CreatedExceptions")
+  resolvedExceptions Exception[]    @relation("ResolvedExceptions")
+  comments        ExceptionComment[]
+  auditLogs       AuditLog[]
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model DataSource {
+  id              String           @id @default(uuid())
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name            String
+  type            DataSourceType
+  config          Json             @default("{}")
+  status          DataSourceStatus @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  imports         Import[]
+  reconciliationsA Reconciliation[] @relation("SourceADataSources")
+  reconciliationsB Reconciliation[] @relation("SourceBDataSources")
+
+  @@index([organizationId])
+  @@map("data_sources")
+}
+
+model Import {
+  id              String         @id @default(uuid())
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dataSourceId    String
+  dataSource      DataSource     @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+  checksum        String
+  status          JobStatus      @default(QUEUED)
+  totalRows       Int            @default(0)
+  validRows       Int            @default(0)
+  invalidRows     Int            @default(0)
+  duplicateRows   Int            @default(0)
+  errorSummary    Json           @default("[]")
+  filePath        String?
+  createdAt       DateTime       @default(now())
+  completedAt     DateTime?
+
+  sourceRecords   SourceRecord[]
+
+  @@unique([organizationId, checksum])
+  @@index([organizationId])
+  @@index([dataSourceId])
+  @@index([createdAt])
+  @@map("imports")
+}
+
+model SourceRecord {
+  id                String       @id @default(uuid())
+  importId          String
+  import            Import       @relation(fields: [importId], references: [id], onDelete: Cascade)
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  externalId        String
+  amount            BigInt       @default(0) // Integer minor units (e.g. cents)
+  currency          String       @default("USD")
+  date              DateTime
+  customerReference String?
+  status            RecordStatus @default(VALID)
+  metadata          Json         @default("{}")
+  createdAt         DateTime     @default(now())
+
+  resultsA          ReconciliationResult[] @relation("SourceARecords")
+  resultsB          ReconciliationResult[] @relation("SourceBRecords")
+
+  @@index([organizationId])
+  @@index([importId])
+  @@index([externalId])
+  @@index([createdAt])
+  @@map("source_records")
+}
+
+model MatchingRule {
+  id                   String       @id @default(uuid())
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name                 String
+  primaryKey           String       @default("external_id")
+  requireAmountMatch   Boolean      @default(true)
+  dateToleranceSeconds Int          @default(86400) // Default 1 day
+  requireCustomerMatch Boolean      @default(false)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  reconciliations      Reconciliation[]
+
+  @@index([organizationId])
+  @@map("matching_rules")
+}
+
+model Reconciliation {
+  id              String         @id @default(uuid())
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name            String
+  status          JobStatus      @default(QUEUED)
+  sourceAId       String
+  sourceA         DataSource     @relation("SourceADataSources", fields: [sourceAId], references: [id])
+  sourceBId       String
+  sourceB         DataSource     @relation("SourceBDataSources", fields: [sourceBId], references: [id])
+  matchingRuleId  String
+  matchingRule    MatchingRule   @relation(fields: [matchingRuleId], references: [id])
+  totalSourceA    Int            @default(0)
+  totalSourceB    Int            @default(0)
+  matchedCount    Int            @default(0)
+  mismatchCount   Int            @default(0)
+  missingACount   Int            @default(0)
+  missingBCount   Int            @default(0)
+  createdById     String
+  createdBy       User           @relation("CreatedReconciliations", fields: [createdById], references: [id])
+  createdAt       DateTime       @default(now())
+  completedAt     DateTime?
+
+  results         ReconciliationResult[]
+  exceptions      Exception[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reconciliations")
+}
+
+model ReconciliationResult {
+  id               String         @id @default(uuid())
+  reconciliationId String
+  reconciliation   Reconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  sourceARecordId  String?
+  sourceARecord    SourceRecord?  @relation("SourceARecords", fields: [sourceARecordId], references: [id])
+  sourceBRecordId  String?
+  sourceBRecord    SourceRecord?  @relation("SourceBRecords", fields: [sourceBRecordId], references: [id])
+  resultType       ResultType
+  differenceAmount BigInt         @default(0)
+  mismatchFields   Json           @default("{}")
+  createdAt        DateTime       @default(now())
+
+  exception        Exception?
+
+  @@index([reconciliationId])
+  @@index([resultType])
+  @@map("reconciliation_results")
+}
+
+model Exception {
+  id               String            @id @default(uuid())
+  organizationId   String
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reconciliationId String
+  reconciliation   Reconciliation    @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  resultId         String            @unique
+  result           ReconciliationResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  severity         ExceptionSeverity @default(MEDIUM)
+  status           ExceptionStatus   @default(OPEN)
+  assignedToId     String?
+  assignedTo       User?             @relation("AssignedExceptions", fields: [assignedToId], references: [id])
+  reason           String?
+  resolution       String?
+  createdById      String
+  createdBy        User              @relation("CreatedExceptions", fields: [createdById], references: [id])
+  resolvedById     String?
+  resolvedBy       User?             @relation("ResolvedExceptions", fields: [resolvedById], references: [id])
+  createdAt        DateTime          @default(now())
+  resolvedAt       DateTime?
+
+  comments         ExceptionComment[]
+
+  @@index([organizationId])
+  @@index([reconciliationId])
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("exceptions")
+}
+
+model ExceptionComment {
+  id          String    @id @default(uuid())
+  exceptionId String
+  exception   Exception @relation(fields: [exceptionId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String
+  createdAt   DateTime  @default(now())
+
+  @@index([exceptionId])
+  @@map("exception_comments")
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action         String
+  resource       String
+  details        Json         @default("{}")
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
