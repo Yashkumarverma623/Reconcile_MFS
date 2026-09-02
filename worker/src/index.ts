@@ -272,3 +272,13 @@ reconciliationWorker.on('failed', (job, err) => {
 });
 
 console.log('[Worker] Worker processes running and waiting for jobs.');
+
+import http from 'http';
+const port = process.env.PORT || 8000;
+http.createServer((_req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Worker is active\n');
+}).listen(port, () => {
+  console.log(`[Worker] Healthcheck HTTP server listening on port ${port}`);
+});
+
