@@ -14,22 +14,22 @@ test.describe('Reconcile Full E2E Workflow Spec', () => {
 
     // Should redirect to /dashboard
     await expect(page).toHaveURL('http://localhost:3000/dashboard');
-    await expect(page.locator('h1')).toContainText('Reconciliation Operations');
+    await expect(page.locator('h1')).toContainText('Reconciliation Workbench');
 
     // 2. Data Sources Page
     await page.goto('http://localhost:3000/data-sources');
-    await page.click('button:has-text("Add Data Source")');
-    await page.fill('input[placeholder="e.g. Stripe Gateway CSV"]', 'Gateway CSV Source');
-    await page.click('button:has-text("Save Data Source")');
-    await expect(page.locator('h3:has-text("Gateway CSV Source")')).toBeVisible();
+    await page.click('button:has-text("Add Connector")');
+    await page.fill('input[placeholder="e.g. Gateway CSV Report"]', 'Gateway CSV Source');
+    await page.click('button:has-text("Save Connector")');
+    await expect(page.locator('span:has-text("Gateway CSV Source")')).toBeVisible();
 
     // 3. Exceptions Workbench Page
     await page.goto('http://localhost:3000/exceptions');
-    await expect(page.locator('h1')).toContainText('Exception Management');
+    await expect(page.locator('h1')).toContainText('Exception Investigation Queue');
 
     // 4. Analytics Dashboard Page
     await page.goto('http://localhost:3000/analytics');
-    await expect(page.locator('h1')).toContainText('Reconciliation Analytics');
+    await expect(page.locator('h1')).toContainText('Operational Analytics');
 
     // 5. Settings Page
     await page.goto('http://localhost:3000/settings');

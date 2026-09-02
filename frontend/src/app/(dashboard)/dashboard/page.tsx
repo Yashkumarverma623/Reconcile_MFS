@@ -7,14 +7,13 @@ import Link from 'next/link';
 import {
   GitCompare,
   AlertTriangle,
-  CheckCircle2,
-  XCircle,
   FileCheck2,
-  TrendingUp,
-  ArrowUpRight,
   Plus,
   Upload,
   RefreshCw,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -34,10 +33,19 @@ export default function DashboardPage() {
     },
   });
 
+  const { data: exceptionsData } = useQuery({
+    queryKey: ['recent-exceptions'],
+    queryFn: async () => {
+      const res = await api.get('/exceptions', { params: { limit: 5 } });
+      return res.data;
+    },
+  });
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-brand-500 animate-spin" />
+      <div className="flex items-center justify-center h-64 text-xs font-mono text-[#57606a]">
+        <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+        Loading operational matrix...
       </div>
     );
   }
@@ -45,176 +53,178 @@ export default function DashboardPage() {
   const { reconciliations, records, exceptions } = data || {
     reconciliations: { total: 0, completed: 0, running: 0, failed: 0 },
     records: { totalProcessedRecords: 0, matchRate: 0, mismatchRate: 0 },
-    exceptions: { open: 0, inReview: 0, resolved: 0, severity: { high: 0 } },
+    exceptions: { open: 0, inReview: 0, resolved: 0, severity: { high: 0, medium: 0, low: 0 } },
   };
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 text-[#1f2328]">
+      {/* Analyst Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d0d7de] pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Reconciliation Operations</h1>
-          <p className="text-sm text-slate-400">
-            Real-time status of transaction matching, data discrepancies, and open exceptions.
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold tracking-tight text-[#1f2328]">Reconciliation Workbench</h1>
+            <span className="text-[10px] font-mono bg-[#f6f8fa] text-[#57606a] px-2 py-0.5 border border-[#d0d7de] rounded">
+              ENVIRONMENT: PRODUCTION
+            </span>
+          </div>
+          <p className="text-xs text-[#57606a] mt-0.5">
+            Operational overview of transaction matching, data discrepancies, and open exception queues.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-2">
           <button
             onClick={() => refetch()}
-            className="p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 transition-colors"
-            title="Refresh Metrics"
+            className="wb-btn-secondary flex items-center gap-1.5"
+            title="Refresh Data"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5 text-[#57606a]" />
+            <span>Refresh</span>
           </button>
-          <Link
-            href="/imports"
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-lg text-sm font-medium text-slate-200 transition-colors"
-          >
-            <Upload className="w-4 h-4 text-sky-400" />
-            Upload Dataset
+          <Link href="/imports" className="wb-btn-secondary flex items-center gap-1.5">
+            <Upload className="w-3.5 h-3.5 text-[#57606a]" />
+            <span>Import Dataset</span>
           </Link>
-          <Link
-            href="/reconciliations"
-            className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-brand-600/20 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            New Reconciliation
+          <Link href="/reconciliations" className="wb-btn-primary flex items-center gap-1.5">
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Run</span>
           </Link>
         </div>
       </div>
 
-      {/* Metrics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Card 1: Total Reconciliations */}
-        <div className="glass-card">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Runs
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center">
-              <GitCompare className="w-4 h-4" />
-            </div>
+      {/* Analytical Summary Matrix */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        {/* Metric 1: Reconciliation Health */}
+        <div className="wb-panel p-3.5">
+          <div className="text-[11px] font-mono font-semibold uppercase text-[#57606a] mb-1">
+            Reconciliation Health
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-extrabold text-white">{reconciliations.total}</span>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-              <span className="text-emerald-400 font-medium">{reconciliations.completed} Completed</span>
-              <span>•</span>
-              <span className="text-amber-400">{reconciliations.running} Active</span>
-            </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl font-bold font-mono text-[#1f2328]">{reconciliations.total}</span>
+            <span className="text-xs font-mono text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-1.5 py-0.5 rounded">
+              {reconciliations.completed} Completed
+            </span>
+          </div>
+          <div className="mt-2 pt-2 border-t border-[#f0f2f5] text-[11px] text-[#57606a] flex justify-between font-mono">
+            <span>Running: {reconciliations.running}</span>
+            <span>Failed: {reconciliations.failed}</span>
           </div>
         </div>
 
-        {/* Card 2: Match Accuracy */}
-        <div className="glass-card">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Match Accuracy
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
-            </div>
+        {/* Metric 2: Match Accuracy */}
+        <div className="wb-panel p-3.5">
+          <div className="text-[11px] font-mono font-semibold uppercase text-[#57606a] mb-1">
+            Match Accuracy Rate
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-extrabold text-white">{records.matchRate}%</span>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-              <span className="text-slate-300">{records.matched || 0} matched records</span>
-            </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl font-bold font-mono text-[#166534]">{records.matchRate}%</span>
+            <span className="text-xs font-mono text-[#57606a]">
+              {records.matched || 0} matched
+            </span>
+          </div>
+          <div className="mt-2 pt-2 border-t border-[#f0f2f5] text-[11px] text-[#57606a] flex justify-between font-mono">
+            <span>Mismatch: {records.mismatchRate}%</span>
+            <span>Missing: {records.missingRate || 0}%</span>
           </div>
         </div>
 
-        {/* Card 3: Open Exceptions */}
-        <div className="glass-card">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Open Exceptions
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
+        {/* Metric 3: Open Exceptions */}
+        <div className="wb-panel p-3.5">
+          <div className="text-[11px] font-mono font-semibold uppercase text-[#57606a] mb-1">
+            Open Exception Queue
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-extrabold text-white">{exceptions.open}</span>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-              <span className="text-red-400 font-medium">{exceptions.severity?.high || 0} High Severity</span>
-            </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl font-bold font-mono text-[#991b1b]">{exceptions.open}</span>
+            <span className="text-xs font-mono text-[#991b1b] bg-[#fef2f2] border border-[#fecaca] px-1.5 py-0.5 rounded">
+              {exceptions.severity?.high || 0} High Severity
+            </span>
+          </div>
+          <div className="mt-2 pt-2 border-t border-[#f0f2f5] text-[11px] text-[#57606a] flex justify-between font-mono">
+            <span>In Review: {exceptions.inReview}</span>
+            <span>Resolved: {exceptions.resolved}</span>
           </div>
         </div>
 
-        {/* Card 4: Total Records Processed */}
-        <div className="glass-card">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Records Evaluated
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <FileCheck2 className="w-4 h-4" />
-            </div>
+        {/* Metric 4: Processed Volume */}
+        <div className="wb-panel p-3.5">
+          <div className="text-[11px] font-mono font-semibold uppercase text-[#57606a] mb-1">
+            Evaluated Volume
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-extrabold text-white">
+          <div className="flex items-baseline justify-between">
+            <span className="text-2xl font-bold font-mono text-[#1f2328]">
               {records.totalProcessedRecords.toLocaleString()}
             </span>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-              <span className="text-emerald-400">{exceptions.resolved} Exceptions Resolved</span>
-            </div>
+            <span className="text-xs font-mono text-[#0969da]">Records</span>
+          </div>
+          <div className="mt-2 pt-2 border-t border-[#f0f2f5] text-[11px] text-[#57606a] flex justify-between font-mono">
+            <span>Audit Trail Logs: Verified</span>
           </div>
         </div>
       </div>
 
-      {/* Main Content Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Reconciliations Table */}
-        <div className="lg:col-span-2 glass-panel p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-bold text-lg text-white">Recent Reconciliation Runs</h3>
-              <p className="text-xs text-slate-400">Latest deterministic matching jobs execution logs</p>
+      {/* Main Operational Tables Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Reconciliation Runs Table */}
+        <div className="lg:col-span-2 wb-panel overflow-hidden">
+          <div className="p-3 bg-[#f6f8fa] border-b border-[#d0d7de] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GitCompare className="w-4 h-4 text-[#57606a]" />
+              <span className="text-xs font-bold text-[#1f2328] uppercase tracking-wider">
+                Recent Reconciliation Runs
+              </span>
             </div>
             <Link
               href="/reconciliations"
-              className="text-xs font-medium text-sky-400 hover:text-sky-300 flex items-center gap-1"
+              className="text-xs text-[#0969da] hover:underline font-medium flex items-center gap-1"
             >
-              View all <ArrowUpRight className="w-3.5 h-3.5" />
+              View all runs <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase bg-slate-950/60 text-slate-400 font-semibold border-b border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="wb-table-header">
                 <tr>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Matched</th>
-                  <th className="px-4 py-3">Mismatched</th>
-                  <th className="px-4 py-3">Missing</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="px-3.5 py-2.5">Run Name</th>
+                  <th className="px-3.5 py-2.5">Status</th>
+                  <th className="px-3.5 py-2.5 text-right">Matched</th>
+                  <th className="px-3.5 py-2.5 text-right">Mismatch</th>
+                  <th className="px-3.5 py-2.5 text-right">Missing</th>
+                  <th className="px-3.5 py-2.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                {reconciliationsData?.reconciliations?.slice(0, 5).map((r: any) => (
-                  <tr key={r.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3.5 font-medium text-white">{r.name}</td>
-                    <td className="px-4 py-3.5">
+              <tbody className="divide-y divide-[#f0f2f5]">
+                {reconciliationsData?.reconciliations?.slice(0, 6).map((r: any) => (
+                  <tr key={r.id} className="wb-table-row">
+                    <td className="px-3.5 py-2.5 font-medium text-[#1f2328] max-w-[200px] truncate">
+                      {r.name}
+                    </td>
+                    <td className="px-3.5 py-2.5">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${
                           r.status === 'COMPLETED'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            ? 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                             : r.status === 'RUNNING' || r.status === 'QUEUED'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                            : 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
                         }`}
                       >
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 font-mono text-emerald-400">{r.matchedCount}</td>
-                    <td className="px-4 py-3.5 font-mono text-amber-400">{r.mismatchCount}</td>
-                    <td className="px-4 py-3.5 font-mono text-red-400">{r.missingACount + r.missingBCount}</td>
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3.5 py-2.5 font-mono text-right text-[#166534] font-medium">
+                      {r.matchedCount}
+                    </td>
+                    <td className="px-3.5 py-2.5 font-mono text-right text-[#92400e] font-medium">
+                      {r.mismatchCount}
+                    </td>
+                    <td className="px-3.5 py-2.5 font-mono text-right text-[#991b1b] font-medium">
+                      {r.missingACount + r.missingBCount}
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right">
                       <Link
                         href={`/reconciliations/${r.id}`}
-                        className="text-xs font-semibold text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 px-3 py-1 rounded-md border border-brand-500/20 transition-colors"
+                        className="wb-btn-secondary text-[11px] py-0.5 px-2"
                       >
                         Inspect
                       </Link>
@@ -226,74 +236,66 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Exception Action Summary Widget */}
-        <div className="glass-panel p-6 flex flex-col justify-between">
+        {/* Exceptions Action Workstand Queue */}
+        <div className="wb-panel overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg text-white">Exception Workstand</h3>
-              <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full font-medium">
+            <div className="p-3 bg-[#f6f8fa] border-b border-[#d0d7de] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#991b1b]" />
+                <span className="text-xs font-bold text-[#1f2328] uppercase tracking-wider">
+                  Open Discrepancies
+                </span>
+              </div>
+              <span className="text-[11px] font-mono bg-[#fef2f2] text-[#991b1b] border border-[#fecaca] px-1.5 py-0.5 rounded font-bold">
                 {exceptions.open} Open
               </span>
             </div>
-            <p className="text-xs text-slate-400 mb-6">
-              Track assigned issues requiring investigation, resolution reasons, or journal entries.
-            </p>
 
-            <div className="space-y-4">
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-bold">
-                    H
+            <div className="divide-y divide-[#f0f2f5]">
+              {exceptionsData?.exceptions?.slice(0, 4).map((exc: any) => (
+                <div key={exc.id} className="p-3 hover:bg-[#f8f9fa] transition-colors text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                        exc.severity === 'HIGH'
+                          ? 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
+                          : exc.severity === 'MEDIUM'
+                          ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                          : 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
+                      }`}
+                    >
+                      {exc.severity}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#57606a]">
+                      {exc.status}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-sm font-semibold text-white block">High Severity</span>
-                    <span className="text-xs text-slate-400">Critical amount/missing errors</span>
+                  <p className="font-mono text-[11px] text-[#1f2328] font-medium truncate mb-1">
+                    {exc.reason}
+                  </p>
+                  <div className="flex items-center justify-between text-[10px] text-[#57606a]">
+                    <span>Run: {exc.reconciliation?.name || 'N/A'}</span>
+                    <Link
+                      href={`/exceptions/${exc.id}`}
+                      className="text-[#0969da] hover:underline font-medium"
+                    >
+                      Investigate →
+                    </Link>
                   </div>
                 </div>
-                <span className="font-mono text-lg font-bold text-red-400">
-                  {exceptions.severity?.high || 0}
-                </span>
-              </div>
-
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
-                    M
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold text-white block">Medium Severity</span>
-                    <span className="text-xs text-slate-400">Date window tolerance exceedance</span>
-                  </div>
-                </div>
-                <span className="font-mono text-lg font-bold text-amber-400">
-                  {exceptions.severity?.medium || 0}
-                </span>
-              </div>
-
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-                    R
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold text-white block">Resolved Issues</span>
-                    <span className="text-xs text-slate-400">Historical resolution verified</span>
-                  </div>
-                </div>
-                <span className="font-mono text-lg font-bold text-emerald-400">
-                  {exceptions.resolved}
-                </span>
-              </div>
+              ))}
             </div>
           </div>
 
-          <Link
-            href="/exceptions"
-            className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 border border-slate-700/60 transition-colors"
-          >
-            Open Exception Workbench
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
+          <div className="p-3 border-t border-[#d0d7de] bg-[#f6f8fa]">
+            <Link
+              href="/exceptions"
+              className="w-full wb-btn-secondary flex items-center justify-center gap-1.5 text-xs text-center"
+            >
+              <span>Open Exception Investigation Queue</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

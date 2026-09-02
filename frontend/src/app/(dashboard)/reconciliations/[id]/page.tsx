@@ -9,12 +9,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertTriangle,
-  HelpCircle,
   Search,
   Filter,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Info,
 } from 'lucide-react';
 
 export default function ReconciliationDetailPage() {
@@ -57,18 +57,19 @@ export default function ReconciliationDetailPage() {
 
   if (isReconLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 text-brand-500 animate-spin" />
+      <div className="flex items-center justify-center h-64 text-xs font-mono text-[#57606a]">
+        <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+        Loading investigation session...
       </div>
     );
   }
 
   if (!reconData) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold text-white mb-2">Reconciliation Job Not Found</h2>
-        <Link href="/reconciliations" className="text-sky-400 text-sm hover:underline">
-          Return to Reconciliations list
+      <div className="p-8 text-center text-xs">
+        <h2 className="font-bold text-[#1f2328] mb-2">Reconciliation Run Not Found</h2>
+        <Link href="/reconciliations" className="text-[#0969da] hover:underline font-mono">
+          ← Return to Reconciliations List
         </Link>
       </div>
     );
@@ -85,41 +86,40 @@ export default function ReconciliationDetailPage() {
     missingACount,
     missingBCount,
     createdAt,
-    completedAt,
   } = reconData;
 
   const totalEvaluated = matchedCount + mismatchCount + missingACount + missingBCount;
 
   return (
-    <div className="space-y-8">
-      {/* Back Button & Header */}
-      <div>
+    <div className="space-y-4 text-[#1f2328]">
+      {/* Top Header & Investigation Identity */}
+      <div className="border-b border-[#d0d7de] pb-3">
         <Link
           href="/reconciliations"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 mb-3"
+          className="inline-flex items-center gap-1 text-xs font-mono text-[#57606a] hover:text-[#1f2328] mb-2"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3 h-3" />
           Back to Reconciliations
         </Link>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white tracking-tight">{name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-[#1f2328] tracking-tight">{name}</h1>
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${
                   status === 'COMPLETED'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    ? 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                     : status === 'RUNNING' || status === 'QUEUED'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse'
-                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                    : 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
                 }`}
               >
                 {status}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Matching Rule: <span className="text-slate-300 font-medium">{matchingRule?.name}</span> • Created at{' '}
+            <p className="text-xs text-[#57606a] mt-0.5 font-mono">
+              Rule: <strong className="text-[#1f2328]">{matchingRule?.name}</strong> • Created:{' '}
               {new Date(createdAt).toLocaleString()}
             </p>
           </div>
@@ -129,200 +129,216 @@ export default function ReconciliationDetailPage() {
               refetchRecon();
               refetchResults();
             }}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-lg text-xs text-slate-300 transition-colors"
+            className="wb-btn-secondary flex items-center gap-1.5"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Refresh Data
+            <RefreshCw className="w-3.5 h-3.5 text-[#57606a]" />
+            <span>Refresh Results</span>
           </button>
         </div>
       </div>
 
-      {/* Overview Breakdown Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="glass-card">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Data Source A
+      {/* Summary Metrics Matrix */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+        <div className="wb-panel p-3 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-0.5">
+            Source A
           </span>
-          <span className="text-sm font-bold text-sky-400 block truncate">{sourceA?.name}</span>
-          <span className="text-xs text-slate-500 font-mono mt-1 block">{sourceA?.type}</span>
+          <span className="font-bold text-[#1f2328] block truncate">{sourceA?.name}</span>
+          <span className="text-[10px] font-mono text-[#57606a]">Format: {sourceA?.type}</span>
         </div>
 
-        <div className="glass-card">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Data Source B
+        <div className="wb-panel p-3 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-0.5">
+            Source B
           </span>
-          <span className="text-sm font-bold text-sky-400 block truncate">{sourceB?.name}</span>
-          <span className="text-xs text-slate-500 font-mono mt-1 block">{sourceB?.type}</span>
+          <span className="font-bold text-[#1f2328] block truncate">{sourceB?.name}</span>
+          <span className="text-[10px] font-mono text-[#57606a]">Format: {sourceB?.type}</span>
         </div>
 
-        <div className="glass-card border-l-4 border-l-emerald-500">
-          <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider block mb-1">
+        <div className="wb-panel p-3 bg-[#f0fdf4] border-[#bbf7d0]">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#166534] block mb-0.5">
             MATCHED
           </span>
-          <span className="text-2xl font-extrabold text-white">{matchedCount}</span>
-          <span className="text-[11px] text-slate-400 block mt-0.5">
-            {totalEvaluated > 0 ? ((matchedCount / totalEvaluated) * 100).toFixed(1) : 0}% of pairs
+          <span className="text-xl font-bold font-mono text-[#166534]">{matchedCount}</span>
+          <span className="text-[10px] font-mono text-[#166534] block">
+            {totalEvaluated > 0 ? ((matchedCount / totalEvaluated) * 100).toFixed(1) : 0}% of records
           </span>
         </div>
 
-        <div className="glass-card border-l-4 border-l-amber-500">
-          <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider block mb-1">
-            MISMATCH
+        <div className="wb-panel p-3 bg-[#fffbe6] border-[#fef08a]">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#92400e] block mb-0.5">
+            MISMATCHES
           </span>
-          <span className="text-2xl font-extrabold text-white">{mismatchCount}</span>
-          <span className="text-[11px] text-slate-400 block mt-0.5">Discrepancies found</span>
+          <span className="text-xl font-bold font-mono text-[#92400e]">{mismatchCount}</span>
+          <span className="text-[10px] font-mono text-[#92400e] block">Field discrepancies</span>
         </div>
 
-        <div className="glass-card border-l-4 border-l-red-500">
-          <span className="text-[11px] font-semibold text-red-400 uppercase tracking-wider block mb-1">
+        <div className="wb-panel p-3 bg-[#fef2f2] border-[#fecaca] col-span-2 sm:col-span-1">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#991b1b] block mb-0.5">
             MISSING RECORDS
           </span>
-          <span className="text-2xl font-extrabold text-white">{missingACount + missingBCount}</span>
-          <span className="text-[11px] text-slate-400 block mt-0.5">
+          <span className="text-xl font-bold font-mono text-[#991b1b]">
+            {missingACount + missingBCount}
+          </span>
+          <span className="text-[10px] font-mono text-[#991b1b] block">
             A: {missingACount} | B: {missingBCount}
           </span>
         </div>
       </div>
 
-      {/* Result Explorer Table Section */}
-      <div className="glass-panel p-6 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Results Explorer Table Section */}
+      <div className="wb-panel overflow-hidden bg-white">
+        <div className="p-3 bg-[#f6f8fa] border-b border-[#d0d7de] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-bold text-lg text-white">Result Explorer</h3>
-            <p className="text-xs text-slate-400">Search and filter evaluated transaction pairs</p>
+            <span className="text-xs font-bold text-[#1f2328] uppercase tracking-wider block">
+              Results Explorer
+            </span>
+            <span className="text-[11px] text-[#57606a]">
+              Evaluated pair comparison log ({totalEvaluated} pairs evaluated)
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Filter Tabs / Select */}
-            <div className="relative">
-              <select
-                value={resultTypeFilter}
-                onChange={(e) => {
-                  setResultTypeFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
-              >
-                <option value="">All Results ({totalEvaluated})</option>
-                <option value="MATCHED">Matched ({matchedCount})</option>
-                <option value="MISMATCH">Mismatch ({mismatchCount})</option>
-                <option value="MISSING_FROM_A">Missing from A ({missingACount})</option>
-                <option value="MISSING_FROM_B">Missing from B ({missingBCount})</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-2">
+            {/* Result Type Filter */}
+            <select
+              value={resultTypeFilter}
+              onChange={(e) => {
+                setResultTypeFilter(e.target.value);
+                setPage(1);
+              }}
+              className="wb-input text-xs py-1"
+            >
+              <option value="">All Results ({totalEvaluated})</option>
+              <option value="MATCHED">Matched ({matchedCount})</option>
+              <option value="MISMATCH">Mismatch ({mismatchCount})</option>
+              <option value="MISSING_FROM_A">Missing from A ({missingACount})</option>
+              <option value="MISSING_FROM_B">Missing from B ({missingBCount})</option>
+            </select>
 
             {/* Search Input */}
-            <div className="relative w-64">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative w-48">
+              <Search className="w-3.5 h-3.5 text-[#57606a] absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Filter by External ID..."
+                placeholder="Filter external ID..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500"
+                className="w-full wb-input pl-7 pr-2 py-1 text-xs"
               />
             </div>
           </div>
         </div>
 
-        {/* Results Table */}
+        {/* Large Comparison Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs uppercase bg-slate-950/70 text-slate-400 font-semibold border-b border-slate-800">
+          <table className="w-full text-left text-xs">
+            <thead className="wb-table-header">
               <tr>
-                <th className="px-4 py-3">External ID</th>
-                <th className="px-4 py-3">Result Status</th>
-                <th className="px-4 py-3">Source A Record</th>
-                <th className="px-4 py-3">Source B Record</th>
-                <th className="px-4 py-3">Difference</th>
-                <th className="px-4 py-3">Mismatch Details</th>
-                <th className="px-4 py-3 text-right">Exception</th>
+                <th className="px-3.5 py-2.5">EXTERNAL ID</th>
+                <th className="px-3.5 py-2.5">SOURCE A</th>
+                <th className="px-3.5 py-2.5">SOURCE B</th>
+                <th className="px-3.5 py-2.5">STATUS</th>
+                <th className="px-3.5 py-2.5 text-right">DIFFERENCE</th>
+                <th className="px-3.5 py-2.5">DISCREPANCY DETAILS</th>
+                <th className="px-3.5 py-2.5 text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tbody className="divide-y divide-[#f0f2f5]">
               {isResultsLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                    Loading result explorer records...
+                  <td colSpan={7} className="px-3.5 py-8 text-center text-[#57606a] font-mono">
+                    Loading results...
                   </td>
                 </tr>
               ) : resultsData?.results?.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                    No results found matching filter criteria.
+                  <td colSpan={7} className="px-3.5 py-8 text-center text-[#57606a] italic">
+                    No evaluated record pairs found matching selected filter.
                   </td>
                 </tr>
               ) : (
                 resultsData?.results?.map((resItem: any) => {
                   const extId =
                     resItem.sourceARecord?.externalId || resItem.sourceBRecord?.externalId || 'N/A';
-                  const diffVal = (parseInt(resItem.differenceAmount, 10) / 100).toFixed(2);
+                  const diffVal = (parseInt(resItem.differenceAmount || 0, 10) / 100).toFixed(2);
+                  const hasDiff = Object.keys(resItem.mismatchFields || {}).length > 0;
 
                   return (
-                    <tr key={resItem.id} className="hover:bg-slate-800/40 transition-colors text-xs">
-                      <td className="px-4 py-3.5 font-mono text-sky-400 font-bold">{extId}</td>
-                      <td className="px-4 py-3.5">
+                    <tr key={resItem.id} className="wb-table-row">
+                      <td className="px-3.5 py-2.5 font-mono text-[#0969da] font-bold">
+                        {extId}
+                      </td>
+                      <td className="px-3.5 py-2.5">
+                        {resItem.sourceARecord ? (
+                          <div className="font-mono text-[11px]">
+                            <span className="font-bold text-[#1f2328]">
+                              ₹{(parseInt(resItem.sourceARecord.amount, 10) / 100).toLocaleString()}
+                            </span>
+                            <span className="text-[#57606a] block text-[10px]">
+                              {new Date(resItem.sourceARecord.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[#991b1b] font-mono text-[11px] italic">[ABSENT IN A]</span>
+                        )}
+                      </td>
+                      <td className="px-3.5 py-2.5">
+                        {resItem.sourceBRecord ? (
+                          <div className="font-mono text-[11px]">
+                            <span className="font-bold text-[#1f2328]">
+                              ₹{(parseInt(resItem.sourceBRecord.amount, 10) / 100).toLocaleString()}
+                            </span>
+                            <span className="text-[#57606a] block text-[10px]">
+                              {new Date(resItem.sourceBRecord.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[#991b1b] font-mono text-[11px] italic">[ABSENT IN B]</span>
+                        )}
+                      </td>
+                      <td className="px-3.5 py-2.5">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full font-semibold ${
+                          className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${
                             resItem.resultType === 'MATCHED'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                               : resItem.resultType === 'MISMATCH'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                              ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                              : 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
                           }`}
                         >
                           {resItem.resultType}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5">
-                        {resItem.sourceARecord ? (
-                          <div>
-                            <span className="font-mono text-slate-200">
-                              ${(parseInt(resItem.sourceARecord.amount, 10) / 100).toFixed(2)}
-                            </span>
-                            <span className="block text-[10px] text-slate-500">
-                              {new Date(resItem.sourceARecord.date).toLocaleDateString()}
-                            </span>
+                      <td className="px-3.5 py-2.5 font-mono text-right font-bold text-[#1f2328]">
+                        {parseFloat(diffVal) > 0 ? `₹${diffVal}` : '₹0.00'}
+                      </td>
+                      <td className="px-3.5 py-2.5 max-w-xs font-mono text-[11px]">
+                        {hasDiff ? (
+                          <div className="bg-[#fffbe6] border border-[#fef08a] rounded p-1.5 text-[#92400e] text-[10px] space-y-0.5">
+                            {Object.entries(resItem.mismatchFields).map(([k, v]: any) => (
+                              <div key={k} className="flex justify-between">
+                                <span className="font-semibold uppercase">{k}:</span>
+                                <span>A: {v.sourceA} vs B: {v.sourceB}</span>
+                              </div>
+                            ))}
                           </div>
                         ) : (
-                          <span className="text-slate-600 italic">None</span>
+                          <span className="text-[#57606a]">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3.5">
-                        {resItem.sourceBRecord ? (
-                          <div>
-                            <span className="font-mono text-slate-200">
-                              ${(parseInt(resItem.sourceBRecord.amount, 10) / 100).toFixed(2)}
-                            </span>
-                            <span className="block text-[10px] text-slate-500">
-                              {new Date(resItem.sourceBRecord.date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-600 italic">None</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono font-semibold text-slate-200">
-                        {parseFloat(diffVal) > 0 ? `$${diffVal}` : '$0.00'}
-                      </td>
-                      <td className="px-4 py-3.5 max-w-xs truncate font-mono text-[11px] text-slate-400">
-                        {Object.keys(resItem.mismatchFields).length > 0
-                          ? JSON.stringify(resItem.mismatchFields)
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="px-3.5 py-2.5 text-right">
                         {resItem.exception ? (
                           <Link
                             href={`/exceptions/${resItem.exception.id}`}
-                            className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20"
+                            className="wb-btn-secondary text-[11px] py-0.5 px-2 text-[#92400e] border-[#fef08a] bg-[#fffbe6]"
                           >
-                            View Exception
+                            Exception →
                           </Link>
                         ) : (
-                          <span className="text-slate-600 text-[11px]">N/A</span>
+                          <span className="text-[#57606a] font-mono text-[10px]">—</span>
                         )}
                       </td>
                     </tr>
@@ -333,27 +349,26 @@ export default function ReconciliationDetailPage() {
           </table>
         </div>
 
-        {/* Pagination Bar */}
+        {/* Pagination */}
         {resultsData?.pagination && (
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400">
+          <div className="p-3 border-t border-[#d0d7de] bg-[#f6f8fa] flex items-center justify-between text-xs text-[#57606a]">
             <span>
-              Showing page {resultsData.pagination.page} of {resultsData.pagination.totalPages} (Total{' '}
-              {resultsData.pagination.total} records)
+              Page {resultsData.pagination.page} of {resultsData.pagination.totalPages} ({resultsData.pagination.total} records)
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded disabled:opacity-40"
+                className="wb-btn-secondary py-0.5 px-2 disabled:opacity-40"
               >
-                <ChevronLeft className="w-4 h-4" />
+                Previous
               </button>
               <button
                 disabled={page >= resultsData.pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded disabled:opacity-40"
+                className="wb-btn-secondary py-0.5 px-2 disabled:opacity-40"
               >
-                <ChevronRight className="w-4 h-4" />
+                Next
               </button>
             </div>
           </div>

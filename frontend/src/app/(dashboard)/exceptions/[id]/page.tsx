@@ -11,11 +11,9 @@ import {
   CheckCircle,
   MessageSquare,
   Send,
-  AlertOctagon,
-  Clock,
-  Check,
   X,
   FileText,
+  AlertOctagon,
 } from 'lucide-react';
 
 export default function ExceptionDetailPage() {
@@ -27,7 +25,7 @@ export default function ExceptionDetailPage() {
   const [showResolveModal, setShowResolveModal] = useState(false);
   const [resolutionReason, setResolutionReason] = useState('');
 
-  const { data: excData, isLoading, refetch } = useQuery({
+  const { data: excData, isLoading } = useQuery({
     queryKey: ['exception-detail', id],
     queryFn: async () => {
       const res = await api.get(`/exceptions/${id}`);
@@ -43,7 +41,6 @@ export default function ExceptionDetailPage() {
     },
   });
 
-  // Assign mutation
   const assignMutation = useMutation({
     mutationFn: async (assignedToId: string | null) => {
       const res = await api.patch(`/exceptions/${id}/assign`, { assignedToId });
@@ -54,7 +51,6 @@ export default function ExceptionDetailPage() {
     },
   });
 
-  // Status mutation
   const statusMutation = useMutation({
     mutationFn: async (payload: { status: string; resolution?: string }) => {
       const res = await api.patch(`/exceptions/${id}/status`, payload);
@@ -67,7 +63,6 @@ export default function ExceptionDetailPage() {
     },
   });
 
-  // Comment mutation
   const commentMutation = useMutation({
     mutationFn: async (content: string) => {
       const res = await api.post(`/exceptions/${id}/comments`, { content });
@@ -80,15 +75,15 @@ export default function ExceptionDetailPage() {
   });
 
   if (isLoading) {
-    return <div className="p-12 text-center text-slate-400">Loading exception details...</div>;
+    return <div className="p-8 text-center font-mono text-xs text-[#57606a]">Loading investigation record...</div>;
   }
 
   if (!excData) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold text-white mb-2">Exception Not Found</h2>
-        <Link href="/exceptions" className="text-sky-400 text-sm hover:underline">
-          Return to Exceptions workbench
+      <div className="p-8 text-center text-xs">
+        <h2 className="font-bold text-[#1f2328] mb-2">Exception Record Not Found</h2>
+        <Link href="/exceptions" className="text-[#0969da] hover:underline font-mono">
+          ← Return to Exception Queue
         </Link>
       </div>
     );
@@ -134,62 +129,62 @@ export default function ExceptionDetailPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
+    <div className="space-y-4 text-[#1f2328]">
+      {/* Top Header */}
+      <div className="border-b border-[#d0d7de] pb-3">
         <Link
           href="/exceptions"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 mb-3"
+          className="inline-flex items-center gap-1 text-xs font-mono text-[#57606a] hover:text-[#1f2328] mb-2"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Exceptions
+          <ArrowLeft className="w-3 h-3" />
+          Back to Exception Queue
         </Link>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <span
-                className={`px-3 py-1 rounded-full font-bold text-xs ${
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
                   severity === 'HIGH'
-                    ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
                     : severity === 'MEDIUM'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                    : 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                 }`}
               >
                 {severity} SEVERITY
               </span>
               <span
-                className={`px-3 py-1 rounded-full font-bold text-xs ${
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${
                   status === 'RESOLVED'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    ? 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                     : status === 'IN_REVIEW'
-                    ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
+                    ? 'bg-[#f1f5f9] text-[#1e293b] border-[#cbd5e1]'
                     : status === 'OPEN'
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    : 'bg-slate-800 text-slate-400'
+                    ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                    : 'bg-[#f6f8fa] text-[#57606a] border-[#d0d7de]'
                 }`}
               >
                 {status}
               </span>
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tight mt-2 font-mono">{reason}</h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Reconciliation Run: <span className="text-slate-300 font-medium">{reconciliation?.name}</span> •
-              Created on {new Date(createdAt).toLocaleString()} by {createdBy?.name}
+            <h1 className="text-base font-bold text-[#1f2328] font-mono mt-1">{reason}</h1>
+            <p className="text-xs text-[#57606a] font-mono mt-0.5">
+              Run: <span className="text-[#1f2328] font-medium">{reconciliation?.name}</span> • Created:{' '}
+              {new Date(createdAt).toLocaleString()} by {createdBy?.name}
             </p>
           </div>
 
-          {/* Action Dropdowns */}
-          <div className="flex items-center gap-3">
-            {/* Assignee Dropdown */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300">
-              <User className="w-3.5 h-3.5 text-sky-400" />
-              <span>Assignee:</span>
+          {/* Controls Bar */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {/* Assignee Control */}
+            <div className="flex items-center gap-1.5 bg-white border border-[#d0d7de] rounded px-2 py-1">
+              <User className="w-3.5 h-3.5 text-[#57606a]" />
+              <span className="font-mono text-[#57606a]">Assignee:</span>
               <select
                 value={assignedTo?.id || ''}
                 onChange={(e) => assignMutation.mutate(e.target.value || null)}
-                className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 focus:outline-none"
+                className="wb-input py-0.5 text-xs border-0 focus:ring-0 bg-transparent font-medium"
               >
                 <option value="">Unassigned</option>
                 {membersData?.members?.map((m: any) => (
@@ -200,13 +195,13 @@ export default function ExceptionDetailPage() {
               </select>
             </div>
 
-            {/* Status Change Dropdown */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300">
-              <span>Status:</span>
+            {/* Status Control */}
+            <div className="flex items-center gap-1.5 bg-white border border-[#d0d7de] rounded px-2 py-1">
+              <span className="font-mono text-[#57606a]">Status:</span>
               <select
                 value={status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 focus:outline-none"
+                className="wb-input py-0.5 text-xs border-0 focus:ring-0 bg-transparent font-medium"
               >
                 <option value="OPEN">OPEN</option>
                 <option value="IN_REVIEW">IN_REVIEW</option>
@@ -218,224 +213,201 @@ export default function ExceptionDetailPage() {
         </div>
       </div>
 
-      {/* Side-by-Side Dataset Record Comparison */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Side-by-Side Record Discrepancy Evidence Box */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Source A Record */}
-        <div className="glass-panel p-5 border-t-4 border-t-sky-500">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+        <div className="wb-panel p-4 bg-white border-t-2 border-t-[#0969da]">
+          <div className="flex items-center justify-between border-b border-[#d0d7de] pb-2 mb-3">
             <div>
-              <span className="text-xs font-semibold text-sky-400 uppercase tracking-wider block">
-                Source A ({reconciliation?.sourceA?.name})
+              <span className="text-xs font-mono font-bold text-[#0969da] uppercase block">
+                SOURCE A ({reconciliation?.sourceA?.name})
               </span>
-              <span className="text-xs text-slate-400 font-mono">Format: {reconciliation?.sourceA?.type}</span>
+              <span className="text-[10px] font-mono text-[#57606a]">Type: {reconciliation?.sourceA?.type}</span>
             </div>
-            <span className="text-xs bg-slate-950 px-2.5 py-1 rounded text-slate-300 font-mono">
+            <span className="text-[10px] font-mono bg-[#f6f8fa] border border-[#d0d7de] px-2 py-0.5 rounded text-[#24292f]">
               ID: {recA?.externalId || 'N/A'}
             </span>
           </div>
 
           {recA ? (
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">External ID</span>
-                <span className="font-mono text-sky-400 font-bold">{recA.externalId}</span>
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">External ID</span>
+                <span className="text-[#0969da] font-bold">{recA.externalId}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Amount</span>
-                <span
-                  className={`font-mono font-bold ${
-                    diffs.amount ? 'text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded' : 'text-slate-200'
-                  }`}
-                >
-                  ${(parseInt(recA.amount, 10) / 100).toFixed(2)} {recA.currency}
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Amount</span>
+                <span className={`font-bold ${diffs.amount ? 'bg-[#fffbe6] text-[#92400e] px-1 border border-[#fef08a] rounded' : 'text-[#1f2328]'}`}>
+                  ₹{(parseInt(recA.amount, 10) / 100).toLocaleString()} {recA.currency}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Transaction Date</span>
-                <span
-                  className={`font-mono ${
-                    diffs.date ? 'text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded' : 'text-slate-200'
-                  }`}
-                >
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Transaction Date</span>
+                <span className={diffs.date ? 'bg-[#fffbe6] text-[#92400e] px-1 border border-[#fef08a] rounded' : 'text-[#1f2328]'}>
                   {new Date(recA.date).toISOString()}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Customer Ref</span>
-                <span className="font-mono text-slate-300">{recA.customerReference || 'N/A'}</span>
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Customer Ref</span>
+                <span className="text-[#1f2328]">{recA.customerReference || 'N/A'}</span>
               </div>
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-500 italic">
-              Record absent in Source A (Missing Record Exception)
+            <div className="p-6 text-center text-[#991b1b] font-mono text-xs italic bg-[#fef2f2] border border-[#fecaca] rounded">
+              Record absent in Source A dataset (Missing Record)
             </div>
           )}
         </div>
 
         {/* Source B Record */}
-        <div className="glass-panel p-5 border-t-4 border-t-sky-500">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+        <div className="wb-panel p-4 bg-white border-t-2 border-t-[#0969da]">
+          <div className="flex items-center justify-between border-b border-[#d0d7de] pb-2 mb-3">
             <div>
-              <span className="text-xs font-semibold text-sky-400 uppercase tracking-wider block">
-                Source B ({reconciliation?.sourceB?.name})
+              <span className="text-xs font-mono font-bold text-[#0969da] uppercase block">
+                SOURCE B ({reconciliation?.sourceB?.name})
               </span>
-              <span className="text-xs text-slate-400 font-mono">Format: {reconciliation?.sourceB?.type}</span>
+              <span className="text-[10px] font-mono text-[#57606a]">Type: {reconciliation?.sourceB?.type}</span>
             </div>
-            <span className="text-xs bg-slate-950 px-2.5 py-1 rounded text-slate-300 font-mono">
+            <span className="text-[10px] font-mono bg-[#f6f8fa] border border-[#d0d7de] px-2 py-0.5 rounded text-[#24292f]">
               ID: {recB?.externalId || 'N/A'}
             </span>
           </div>
 
           {recB ? (
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">External ID</span>
-                <span className="font-mono text-sky-400 font-bold">{recB.externalId}</span>
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">External ID</span>
+                <span className="text-[#0969da] font-bold">{recB.externalId}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Amount</span>
-                <span
-                  className={`font-mono font-bold ${
-                    diffs.amount ? 'text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded' : 'text-slate-200'
-                  }`}
-                >
-                  ${(parseInt(recB.amount, 10) / 100).toFixed(2)} {recB.currency}
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Amount</span>
+                <span className={`font-bold ${diffs.amount ? 'bg-[#fffbe6] text-[#92400e] px-1 border border-[#fef08a] rounded' : 'text-[#1f2328]'}`}>
+                  ₹{(parseInt(recB.amount, 10) / 100).toLocaleString()} {recB.currency}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Transaction Date</span>
-                <span
-                  className={`font-mono ${
-                    diffs.date ? 'text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded' : 'text-slate-200'
-                  }`}
-                >
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Transaction Date</span>
+                <span className={diffs.date ? 'bg-[#fffbe6] text-[#92400e] px-1 border border-[#fef08a] rounded' : 'text-[#1f2328]'}>
                   {new Date(recB.date).toISOString()}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800/60">
-                <span className="text-slate-400">Customer Ref</span>
-                <span className="font-mono text-slate-300">{recB.customerReference || 'N/A'}</span>
+              <div className="flex justify-between py-1 border-b border-[#f0f2f5]">
+                <span className="text-[#57606a]">Customer Ref</span>
+                <span className="text-[#1f2328]">{recB.customerReference || 'N/A'}</span>
               </div>
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-500 italic">
-              Record absent in Source B (Missing Record Exception)
+            <div className="p-6 text-center text-[#991b1b] font-mono text-xs italic bg-[#fef2f2] border border-[#fecaca] rounded">
+              Record absent in Source B dataset (Missing Record)
             </div>
           )}
         </div>
       </div>
 
-      {/* Resolution Summary Box (If resolved) */}
+      {/* Resolution Log (If resolved) */}
       {status === 'RESOLVED' && resolution && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5 space-y-2">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-            <CheckCircle className="w-5 h-5" />
+        <div className="wb-panel p-4 bg-[#f0fdf4] border-[#bbf7d0] space-y-1 text-xs">
+          <div className="flex items-center gap-1.5 text-[#166534] font-bold">
+            <CheckCircle className="w-4 h-4" />
             Verified Resolution Logged
           </div>
-          <p className="text-sm text-slate-200 font-medium">{resolution}</p>
-          <div className="text-xs text-emerald-400/80 font-mono pt-1">
-            Resolved by {resolvedBy?.name || 'Team Member'} on{' '}
+          <p className="text-[#1f2328] font-mono">{resolution}</p>
+          <div className="text-[11px] text-[#166534] font-mono pt-1">
+            Resolved by {resolvedBy?.name || 'Analyst'} on{' '}
             {resolvedAt ? new Date(resolvedAt).toLocaleString() : 'N/A'}
           </div>
         </div>
       )}
 
-      {/* Investigation Notes & Timeline of Append-Only Comments */}
-      <div className="glass-panel p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <h3 className="font-bold text-lg text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-brand-400" />
-            Investigation Notes & Audit Timeline ({comments?.length || 0})
+      {/* Vertical Investigation Evidence Notes Trail */}
+      <div className="wb-panel p-4 bg-white space-y-4">
+        <div className="flex items-center justify-between border-b border-[#d0d7de] pb-2">
+          <h3 className="font-bold text-xs uppercase tracking-wider text-[#1f2328] font-mono flex items-center gap-1.5">
+            <MessageSquare className="w-4 h-4 text-[#57606a]" />
+            Investigation Notes & Audit Evidence Trail ({comments?.length || 0})
           </h3>
         </div>
 
-        {/* Comments Stream */}
-        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+        {/* Append-only Comments List */}
+        <div className="space-y-2 max-h-80 overflow-y-auto">
           {comments?.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">No notes posted yet for this exception.</p>
+            <p className="text-xs text-[#57606a] italic font-mono">No notes logged yet for this discrepancy.</p>
           ) : (
             comments?.map((c: any) => (
-              <div key={c.id} className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-brand-600 flex items-center justify-center font-bold text-[10px] text-white">
-                      {c.user?.name?.[0] || 'U'}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-200">{c.user?.name}</span>
-                  </div>
-                  <span className="text-[11px] font-mono text-slate-500">
-                    {new Date(c.createdAt).toLocaleString()}
-                  </span>
+              <div key={c.id} className="p-3 bg-[#f6f8fa] border border-[#d0d7de] rounded text-xs space-y-1">
+                <div className="flex items-center justify-between font-mono text-[11px]">
+                  <span className="font-bold text-[#1f2328]">{c.user?.name}</span>
+                  <span className="text-[#57606a]">{new Date(c.createdAt).toLocaleString()}</span>
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">{c.content}</p>
+                <p className="text-[#1f2328] leading-relaxed">{c.content}</p>
               </div>
             ))
           )}
         </div>
 
-        {/* Append Comment Form */}
-        <form onSubmit={handleAddComment} className="pt-2 border-t border-slate-800 flex gap-3">
+        {/* Add Note Form */}
+        <form onSubmit={handleAddComment} className="pt-2 border-t border-[#d0d7de] flex gap-2">
           <input
             type="text"
             placeholder="Add an investigation note, ledger reference, or comment..."
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-brand-500"
+            className="flex-1 wb-input text-xs"
           />
           <button
             type="submit"
             disabled={commentMutation.isPending}
-            className="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+            className="wb-btn-primary flex items-center gap-1 text-xs"
           >
-            <Send className="w-4 h-4" />
-            Post Note
+            <Send className="w-3.5 h-3.5" />
+            <span>Post Note</span>
           </button>
         </form>
       </div>
 
       {/* Modal: Resolution Confirmation */}
       {showResolveModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
-                Resolve Discrepancy Exception
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-[#d0d7de] rounded max-w-md w-full p-5 shadow-lg space-y-3 text-xs">
+            <div className="flex items-center justify-between border-b border-[#d0d7de] pb-2">
+              <h3 className="font-bold text-sm text-[#1f2328] flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-[#166534]" />
+                Log Discrepancy Resolution
               </h3>
-              <button onClick={() => setShowResolveModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+              <button onClick={() => setShowResolveModal(false)} className="text-[#57606a] hover:text-[#1f2328]">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleResolveSubmit} className="space-y-4">
+            <form onSubmit={handleResolveSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Resolution Reason / Action Taken *
+                <label className="block font-mono font-semibold uppercase text-[#57606a] mb-1">
+                  Resolution Action Taken / Journal Entry Ref *
                 </label>
                 <textarea
                   rows={4}
                   required
-                  placeholder="Describe how this discrepancy was resolved (e.g., 'Posted journal entry JE-9801 in ERP ledger', 'Verified vendor fee adjustment')."
+                  placeholder="Describe resolution (e.g., 'Posted adjustment entry JE-9982 in ERP ledger', 'Verified gateway fee tolerance')."
                   value={resolutionReason}
                   onChange={(e) => setResolutionReason(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full wb-input font-mono"
                 />
               </div>
 
-              <div className="pt-3 flex justify-end gap-3 border-t border-slate-800">
+              <div className="pt-2 flex justify-end gap-2 border-t border-[#d0d7de]">
                 <button
                   type="button"
                   onClick={() => setShowResolveModal(false)}
-                  className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg"
+                  className="wb-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={statusMutation.isPending}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                  className="wb-btn-primary"
                 >
-                  {statusMutation.isPending ? 'Resolving...' : 'Confirm Resolution'}
+                  {statusMutation.isPending ? 'Saving...' : 'Confirm Resolution'}
                 </button>
               </div>
             </form>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 import Link from 'next/link';
-import { ShieldCheck, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -23,64 +23,61 @@ export default function LoginPage() {
       login(res.data.token, res.data.user);
       window.location.href = '/dashboard';
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.error?.message || 'Authentication failed. Please verify credentials.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Glow Effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brand-600/10 blur-[120px] rounded-full pointer-events-none"></div>
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
-        <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-600 to-sky-400 flex items-center justify-center text-white shadow-xl shadow-brand-500/25 mb-4">
-          <ShieldCheck className="w-6 h-6" />
+    <div className="min-h-screen bg-[#f6f8fa] flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-[#1f2328]">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div className="mx-auto w-10 h-10 rounded bg-[#1f2328] text-white flex items-center justify-center font-mono font-bold text-sm tracking-widest mb-3">
+          REC
         </div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">Sign in to Reconcile</h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Data Reconciliation & Exception Management Platform
+        <h2 className="text-xl font-bold tracking-tight text-[#1f2328]">Sign in to Reconcile</h2>
+        <p className="mt-1 text-xs text-[#57606a] font-mono">
+          Data Reconciliation & Exception Investigation Workbench
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div className="glass-panel p-8">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="wb-panel p-6 bg-white shadow-xs">
           {error && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-400 flex items-center gap-2">
-              <span>{error}</span>
+            <div className="mb-4 bg-[#fef2f2] border border-[#fecaca] rounded p-2 text-xs text-[#991b1b] font-mono">
+              {error}
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4 text-xs" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Email address
+              <label className="block font-mono font-semibold uppercase text-[#57606a] mb-1">
+                Work Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-3.5 h-3.5 text-[#57606a] absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full wb-input pl-8"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block font-mono font-semibold uppercase text-[#57606a] mb-1">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-3.5 h-3.5 text-[#57606a] absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition-colors"
+                  className="w-full wb-input pl-8 font-mono"
                 />
               </div>
             </div>
@@ -88,17 +85,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-brand-600 to-sky-500 hover:from-brand-500 hover:to-sky-400 text-white font-medium py-2.5 px-4 rounded-lg shadow-lg shadow-brand-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full wb-btn-primary py-2 flex items-center justify-center gap-1.5 text-xs font-semibold disabled:opacity-50 mt-2"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
-              <ArrowRight className="w-4 h-4" />
+              <span>{loading ? 'Authenticating...' : 'Sign In to Workbench'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-slate-400 border-t border-slate-800 pt-5">
-            <span>Don't have an account? </span>
-            <Link href="/register" className="text-sky-400 font-medium hover:underline">
-              Create an organization
+          <div className="mt-5 text-center text-xs text-[#57606a] border-t border-[#f0f2f5] pt-4">
+            <span>Need an organization account? </span>
+            <Link href="/register" className="text-[#0969da] font-semibold hover:underline">
+              Register Organization
             </Link>
           </div>
         </div>

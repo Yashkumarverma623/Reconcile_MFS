@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../lib/api';
 import Link from 'next/link';
-import { AlertTriangle, Filter, Search, ChevronLeft, ChevronRight, User, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Search, RefreshCw, User } from 'lucide-react';
 
 export default function ExceptionsListPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -39,27 +39,26 @@ export default function ExceptionsListPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 text-[#1f2328]">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d0d7de] pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Exception Management</h1>
-          <p className="text-sm text-slate-400">
-            Investigate transaction discrepancies, assign ownership, and log historical resolutions.
+          <h1 className="text-lg font-bold tracking-tight text-[#1f2328]">Exception Investigation Queue</h1>
+          <p className="text-xs text-[#57606a] mt-0.5">
+            Operational queue for investigating transaction discrepancies, assigning ownership, and tracking resolution.
           </p>
         </div>
-        <button
-          onClick={() => refetch()}
-          className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-lg text-xs text-slate-300 transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Refresh
+        <button onClick={() => refetch()} className="wb-btn-secondary flex items-center gap-1.5">
+          <RefreshCw className="w-3.5 h-3.5 text-[#57606a]" />
+          <span>Refresh Queue</span>
         </button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="glass-panel p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
+      {/* Prominent Multi-Filter Bar */}
+      <div className="wb-panel p-3 flex flex-wrap items-center justify-between gap-3 bg-white">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-mono font-semibold uppercase text-[#57606a] mr-1">Filters:</span>
+
           {/* Status Select */}
           <select
             value={statusFilter}
@@ -67,13 +66,13 @@ export default function ExceptionsListPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+            className="wb-input text-xs py-1"
           >
             <option value="">All Statuses</option>
-            <option value="OPEN">Open</option>
-            <option value="IN_REVIEW">In Review</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="IGNORED">Ignored</option>
+            <option value="OPEN">OPEN</option>
+            <option value="IN_REVIEW">IN_REVIEW</option>
+            <option value="RESOLVED">RESOLVED</option>
+            <option value="IGNORED">IGNORED</option>
           </select>
 
           {/* Severity Select */}
@@ -83,12 +82,12 @@ export default function ExceptionsListPage() {
               setSeverityFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+            className="wb-input text-xs py-1"
           >
             <option value="">All Severities</option>
-            <option value="HIGH">High Severity</option>
-            <option value="MEDIUM">Medium Severity</option>
-            <option value="LOW">Low Severity</option>
+            <option value="HIGH">HIGH SEVERITY</option>
+            <option value="MEDIUM">MEDIUM SEVERITY</option>
+            <option value="LOW">LOW SEVERITY</option>
           </select>
 
           {/* Assignee Select */}
@@ -98,7 +97,7 @@ export default function ExceptionsListPage() {
               setAssigneeFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+            className="wb-input text-xs py-1"
           >
             <option value="">All Assignees</option>
             <option value="unassigned">Unassigned</option>
@@ -111,8 +110,8 @@ export default function ExceptionsListPage() {
         </div>
 
         {/* Search */}
-        <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+        <div className="relative w-60">
+          <Search className="w-3.5 h-3.5 text-[#57606a] absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search reasons, IDs..."
@@ -121,92 +120,94 @@ export default function ExceptionsListPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500"
+            className="w-full wb-input pl-8 pr-3 py-1 text-xs"
           />
         </div>
       </div>
 
       {/* Exception Table */}
-      <div className="glass-panel overflow-hidden">
+      <div className="wb-panel overflow-hidden bg-white">
         {isLoading ? (
-          <div className="p-12 text-center text-slate-500">Loading exceptions...</div>
+          <div className="p-8 text-center font-mono text-xs text-[#57606a]">Loading queue...</div>
         ) : data?.exceptions?.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">No exceptions found matching filters.</div>
+          <div className="p-8 text-center text-xs text-[#57606a] italic">
+            No exceptions found in queue matching active filters.
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs uppercase bg-slate-950/70 text-slate-400 font-semibold border-b border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="wb-table-header">
                 <tr>
-                  <th className="px-5 py-3.5">Severity</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5">Reconciliation Job</th>
-                  <th className="px-5 py-3.5">Discrepancy Reason</th>
-                  <th className="px-5 py-3.5">Assigned To</th>
-                  <th className="px-5 py-3.5">Age</th>
-                  <th className="px-5 py-3.5 text-right">Action</th>
+                  <th className="px-3.5 py-2.5">SEVERITY</th>
+                  <th className="px-3.5 py-2.5">STATUS</th>
+                  <th className="px-3.5 py-2.5">RECONCILIATION RUN</th>
+                  <th className="px-3.5 py-2.5">DISCREPANCY REASON</th>
+                  <th className="px-3.5 py-2.5">ASSIGNED TO</th>
+                  <th className="px-3.5 py-2.5">AGE</th>
+                  <th className="px-3.5 py-2.5 text-right">ACTION</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              <tbody className="divide-y divide-[#f0f2f5]">
                 {data?.exceptions?.map((exc: any) => {
                   const ageDays = Math.floor(
                     (new Date().getTime() - new Date(exc.createdAt).getTime()) / (1000 * 60 * 60 * 24)
                   );
 
                   return (
-                    <tr key={exc.id} className="hover:bg-slate-800/40 transition-colors text-xs">
-                      <td className="px-5 py-4">
+                    <tr key={exc.id} className="wb-table-row">
+                      <td className="px-3.5 py-2.5">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
+                          className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
                             exc.severity === 'HIGH'
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                              ? 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]'
                               : exc.severity === 'MEDIUM'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                              : 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                           }`}
                         >
                           {exc.severity}
                         </span>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-3.5 py-2.5">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full font-semibold ${
+                          className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${
                             exc.status === 'RESOLVED'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]'
                               : exc.status === 'IN_REVIEW'
-                              ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
+                              ? 'bg-[#f1f5f9] text-[#1e293b] border-[#cbd5e1]'
                               : exc.status === 'OPEN'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              ? 'bg-[#fffbe6] text-[#92400e] border-[#fef08a]'
+                              : 'bg-[#f6f8fa] text-[#57606a] border-[#d0d7de]'
                           }`}
                         >
                           {exc.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 font-medium text-white max-w-xs truncate">
+                      <td className="px-3.5 py-2.5 font-medium text-[#1f2328] max-w-[180px] truncate">
                         {exc.reconciliation?.name}
                       </td>
-                      <td className="px-5 py-4 max-w-sm truncate text-slate-300 font-mono text-[11px]">
+                      <td className="px-3.5 py-2.5 max-w-sm truncate text-[#24292f] font-mono text-[11px]">
                         {exc.reason}
                       </td>
-                      <td className="px-5 py-4 text-slate-300">
+                      <td className="px-3.5 py-2.5 text-[#57606a]">
                         {exc.assignedTo ? (
-                          <span className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-sky-400" />
+                          <span className="flex items-center gap-1 font-medium text-[#1f2328]">
+                            <User className="w-3 h-3 text-[#57606a]" />
                             {exc.assignedTo.name}
                           </span>
                         ) : (
-                          <span className="text-slate-500 italic">Unassigned</span>
+                          <span className="text-[#8c959f] italic">Unassigned</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-slate-400 font-mono">
+                      <td className="px-3.5 py-2.5 text-[#57606a] font-mono text-[11px]">
                         {ageDays === 0 ? 'Today' : `${ageDays}d ago`}
                       </td>
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-3.5 py-2.5 text-right">
                         <Link
                           href={`/exceptions/${exc.id}`}
-                          className="text-xs font-semibold text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 px-3 py-1 rounded-md border border-brand-500/20 transition-colors"
+                          className="wb-btn-secondary text-[11px] py-0.5 px-2"
                         >
-                          Investigate
+                          Investigate →
                         </Link>
                       </td>
                     </tr>
@@ -217,26 +218,26 @@ export default function ExceptionsListPage() {
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Pagination Bar */}
         {data?.pagination && (
-          <div className="flex items-center justify-between p-4 border-t border-slate-800 text-xs text-slate-400">
+          <div className="p-3 border-t border-[#d0d7de] bg-[#f6f8fa] flex items-center justify-between text-xs text-[#57606a]">
             <span>
               Page {data.pagination.page} of {data.pagination.totalPages} ({data.pagination.total} exceptions)
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded disabled:opacity-40"
+                className="wb-btn-secondary py-0.5 px-2 disabled:opacity-40"
               >
-                <ChevronLeft className="w-4 h-4" />
+                Previous
               </button>
               <button
                 disabled={page >= data.pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded disabled:opacity-40"
+                className="wb-btn-secondary py-0.5 px-2 disabled:opacity-40"
               >
-                <ChevronRight className="w-4 h-4" />
+                Next
               </button>
             </div>
           </div>

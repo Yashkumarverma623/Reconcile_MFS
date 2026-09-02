@@ -36,7 +36,7 @@ export default function AnalyticsPage() {
   });
 
   if (isLoading) {
-    return <div className="p-12 text-center text-slate-500">Loading analytics engine data...</div>;
+    return <div className="p-8 text-center font-mono text-xs text-[#57606a]">Loading analytical benchmarks...</div>;
   }
 
   const { records, exceptions } = data || {
@@ -45,97 +45,105 @@ export default function AnalyticsPage() {
   };
 
   const severityPieData = [
-    { name: 'High Severity', value: exceptions.severity?.high || 0, color: '#ef4444' },
-    { name: 'Medium Severity', value: exceptions.severity?.medium || 0, color: '#f59e0b' },
-    { name: 'Low Severity', value: exceptions.severity?.low || 0, color: '#10b981' },
+    { name: 'High Severity', value: exceptions.severity?.high || 0, color: '#991b1b' },
+    { name: 'Medium Severity', value: exceptions.severity?.medium || 0, color: '#92400e' },
+    { name: 'Low Severity', value: exceptions.severity?.low || 0, color: '#166534' },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 text-[#1f2328]">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Reconciliation Analytics</h1>
-        <p className="text-sm text-slate-400">
-          Quantitative accuracy benchmarks, exception severity distribution, and operational metrics.
+      <div className="border-b border-[#d0d7de] pb-3">
+        <h1 className="text-lg font-bold tracking-tight text-[#1f2328]">Operational Analytics</h1>
+        <p className="text-xs text-[#57606a] mt-0.5">
+          Quantitative reconciliation benchmarks, accuracy indicators, and resolution times.
         </p>
       </div>
 
-      {/* High-Level Rate Indicators Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
-            Match Rate
+      {/* Analytical Rate Indicators Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div className="wb-panel p-3.5 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-1">
+            Overall Match Rate
           </span>
-          <span className="text-2xl font-extrabold text-emerald-400">{records.matchRate}%</span>
+          <span className="text-2xl font-bold font-mono text-[#166534]">{records.matchRate}%</span>
+          <span className="text-[10px] font-mono text-[#57606a] block mt-1">Matched record ratio</span>
         </div>
 
-        <div className="glass-card">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
-            Mismatch Rate
+        <div className="wb-panel p-3.5 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-1">
+            Mismatch Discrepancy Rate
           </span>
-          <span className="text-2xl font-extrabold text-amber-400">{records.mismatchRate}%</span>
+          <span className="text-2xl font-bold font-mono text-[#92400e]">{records.mismatchRate}%</span>
+          <span className="text-[10px] font-mono text-[#57606a] block mt-1">Field variance ratio</span>
         </div>
 
-        <div className="glass-card">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
-            Duplicate Rate
+        <div className="wb-panel p-3.5 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-1">
+            Duplicate Ingestion Rate
           </span>
-          <span className="text-2xl font-extrabold text-sky-400">{records.duplicateRate}%</span>
+          <span className="text-2xl font-bold font-mono text-[#0969da]">{records.duplicateRate}%</span>
+          <span className="text-[10px] font-mono text-[#57606a] block mt-1">Deduplicated rows</span>
         </div>
 
-        <div className="glass-card">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
-            Avg Resolution
+        <div className="wb-panel p-3.5 bg-white">
+          <span className="text-[10px] font-mono font-semibold uppercase text-[#57606a] block mb-1">
+            Avg Resolution Duration
           </span>
-          <span className="text-2xl font-extrabold text-brand-400">
+          <span className="text-2xl font-bold font-mono text-[#1f2328]">
             {exceptions.avgResolutionHours} hrs
           </span>
+          <span className="text-[10px] font-mono text-[#57606a] block mt-1">Mean time to resolve</span>
         </div>
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Analytical Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
         {/* Trend Bar Chart */}
-        <div className="lg:col-span-2 glass-panel p-6 space-y-4">
-          <div>
-            <h3 className="font-bold text-lg text-white">Reconciliation Matching Trend</h3>
-            <p className="text-xs text-slate-400">Matched vs Mismatched vs Missing record breakdown</p>
+        <div className="lg:col-span-2 wb-panel p-4 bg-white space-y-3">
+          <div className="border-b border-[#f0f2f5] pb-2">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#1f2328] font-mono">
+              Reconciliation Matching Performance Log
+            </h3>
+            <p className="text-[11px] text-[#57606a]">Matched vs Mismatched vs Missing record breakdown per run</p>
           </div>
 
-          <div className="h-72 w-full pt-4">
+          <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData?.trendData || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e1e4e8" />
+                <XAxis dataKey="name" stroke="#57606a" fontSize={10} fontFamily="monospace" />
+                <YAxis stroke="#57606a" fontSize={10} fontFamily="monospace" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#d0d7de', borderRadius: '4px', fontSize: '11px' }}
                 />
-                <Bar dataKey="matched" name="Matched" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="mismatch" name="Mismatch" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="missing" name="Missing" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="matched" name="Matched" fill="#166534" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="mismatch" name="Mismatch" fill="#92400e" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="missing" name="Missing" fill="#991b1b" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Severity Distribution Pie Chart */}
-        <div className="glass-panel p-6 space-y-4">
-          <div>
-            <h3 className="font-bold text-lg text-white">Exception Severity Breakdown</h3>
-            <p className="text-xs text-slate-400">Categorization of active discrepancies</p>
+        <div className="wb-panel p-4 bg-white space-y-3">
+          <div className="border-b border-[#f0f2f5] pb-2">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#1f2328] font-mono">
+              Exception Severity Distribution
+            </h3>
+            <p className="text-[11px] text-[#57606a]">Active discrepancy severity categorization</p>
           </div>
 
-          <div className="h-64 w-full flex items-center justify-center">
+          <div className="h-56 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={severityPieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={5}
+                  innerRadius={40}
+                  outerRadius={70}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {severityPieData.map((entry, index) => (
@@ -143,9 +151,9 @@ export default function AnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#d0d7de', borderRadius: '4px', fontSize: '11px' }}
                 />
-                <Legend wrapperStyle={{ fontSize: '11px', color: '#cbd5e1' }} />
+                <Legend wrapperStyle={{ fontSize: '11px', color: '#1f2328' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
